@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Comic;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,8 +17,12 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+        $comics = Comic::where('uploader_id', $user->id)->get();
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
+            'comics' => $comics,
         ]);
     }
 
@@ -56,5 +61,14 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    public function becomeTranslator(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        $user->role = \App\Models\User::ROLE_TRANSLATOR;
+        $user->save();
+
+        return Redirect::route('profile.edit')->with('status', 'translator-upgraded');
     }
 }

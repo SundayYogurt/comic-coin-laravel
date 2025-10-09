@@ -3,7 +3,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 class Comic extends Model {
-    protected $fillable = ['title', 'description', 'cover_image'];
+    protected $fillable = ['title', 'description', 'cover_image', 'uploader_id'];
     public function chapters()
     {
         return $this->hasMany(Chapter::class);
@@ -12,5 +12,10 @@ class Comic extends Model {
     public function favoritedBy()
     {
         return $this->belongsToMany(User::class, 'comic_user');
+    }
+
+    public function uploader()
+    {
+        return $this->belongsTo(User::class, 'uploader_id');
     }
 }

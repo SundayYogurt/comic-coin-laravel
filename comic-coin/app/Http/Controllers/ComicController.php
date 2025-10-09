@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Comic;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,7 +18,8 @@ class ComicController extends Controller
 
     public function create()
     {
-        return view('comics.create');
+        $users = User::where('role', User::ROLE_TRANSLATOR)->orWhere('is_admin', true)->get();
+        return view('comics.create', compact('users'));
     }
 
     public function store(Request $request)
@@ -27,10 +29,17 @@ class ComicController extends Controller
             'description' => 'nullable|string',
             'author' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'uploader_id' => 'nullable|exists:users,id',
         ]);
 
         if ($request->hasFile('cover_image')) {
             $validated['cover_image'] = $request->file('cover_image')->store('covers', 'public');
+        }
+
+        if (Auth::user()->isAdmin() && $request->has('uploader_id')) {
+            $validated['uploader_id'] = $request->uploader_id;
+        } else {
+            $validated['uploader_id'] = Auth::id();
         }
 
         Comic::create($validated);
@@ -40,11 +49,18 @@ class ComicController extends Controller
 
     public function edit(Comic $comic)
     {
+        if (Auth::user()->cannot('update', $comic)) {
+            abort(403);
+        }
         return view('comics.edit', compact('comic'));
     }
 
     public function update(Request $request, Comic $comic)
     {
+        if (Auth::user()->cannot('update', $comic)) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -66,6 +82,10 @@ class ComicController extends Controller
 
     public function destroy(Comic $comic)
     {
+        if (Auth::user()->cannot('delete', $comic)) {
+            abort(403);
+        }
+
         if ($comic->cover_image) {
             Storage::disk('public')->delete($comic->cover_image);
         }

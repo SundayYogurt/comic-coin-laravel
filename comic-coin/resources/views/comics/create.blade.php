@@ -27,6 +27,28 @@
                             <x-input-error :messages="$errors->get('description')" class="mt-2" />
                         </div>
 
+                        <!-- Author -->
+                        <div class="mt-4">
+                            <x-input-label for="author" :value="__('Author')" />
+                            <x-text-input id="author" class="block mt-1 w-full" type="text" name="author" :value="old('author')" />
+                            <x-input-error :messages="$errors->get('author')" class="mt-2" />
+                        </div>
+
+                        <!-- Translator (Uploader) -->
+                        @if(Auth::user()->isAdmin())
+                            <div class="mt-4">
+                                <x-input-label for="uploader_id" :value="__('Translator')" />
+                                <select id="uploader_id" name="uploader_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}" {{ old('uploader_id') == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('uploader_id')" class="mt-2" />
+                            </div>
+                        @else
+                             <input type="hidden" name="uploader_id" value="{{ Auth::id() }}">
+                        @endif
+
                         <!-- Cover Image -->
                         <div class="mt-4">
                             <x-input-label for="cover_image" :value="__('Cover Image')" />

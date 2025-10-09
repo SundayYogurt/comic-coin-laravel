@@ -4,8 +4,8 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Explore Comics') }}
             </h2>
-            @if(Auth::check() && Auth::user()->is_admin)
-            <a href="{{ route('comics.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
+            @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isTranslator()))
+            <a href="{{ route('comics.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-700 border border-transparent rounded-lg font-bold text-sm text-white uppercase tracking-wider shadow-md hover:bg-indigo-600 hover:shadow-lg focus:bg-indigo-600 active:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transform hover:scale-105 transition-all ease-in-out duration-150">
                 {{ __('Add New Comic') }}
             </a>
             @endif
@@ -41,7 +41,7 @@
                     @else
                         <div class="text-center py-12">
                             <p class="text-gray-500 text-lg">No comics found.</p>
-                            <a href="{{ route('comics.create') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
+                            <a href="{{ route('comics.create') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest shadow-md hover:bg-gray-500 hover:shadow-lg focus:bg-gray-500 active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transform hover:scale-105 transition-all ease-in-out duration-150">
                                 {{ __('Add the First Comic') }}
                             </a>
                         </div>

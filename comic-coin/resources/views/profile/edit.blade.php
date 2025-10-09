@@ -24,6 +24,25 @@
                     @include('profile.partials.delete-user-form')
                 </div>
             </div>
+
+            @if(auth()->user()->isTranslator() || auth()->user()->isAdmin())
+                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                    <div class="max-w-xl">
+                        @include('profile.partials.user-comics-list')
+                    </div>
+                </div>
+            @else
+                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                    <div class="max-w-xl">
+                        <h2 class="text-lg font-medium text-gray-900">{{ __('Become a Translator') }}</h2>
+                        <p class="mt-1 text-sm text-gray-600">{{ __('Join our community of translators and start uploading your own comics.') }}</p>
+                        <form method="POST" action="{{ route('profile.becomeTranslator') }}" class="mt-6">
+                            @csrf
+                            <button type="submit" class="btn btn-primary">{{ __('Become a Translator') }}</button>
+                        </form>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

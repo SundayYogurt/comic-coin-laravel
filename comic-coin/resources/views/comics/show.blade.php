@@ -1,154 +1,167 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ $comic->title }}
-        </h2>
-    </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
             <!-- Comic Info -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 md:p-8">
-                <div class="md:flex md:gap-8">
+            <div class="bg-base-100 shadow-xl rounded-lg p-6 md:p-8 border border-base-300">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <!-- Cover Image -->
-                    <div class="md:w-1/3 mb-6 md:mb-0">
+                    <div class="md:col-span-1">
                         <img src="{{ $comic->cover_image ? asset('storage/' . $comic->cover_image) : 'https://via.placeholder.com/300x450.png?text=No+Image' }}"
                              alt="{{ $comic->title }}"
                              class="w-full rounded-lg shadow-lg">
                     </div>
 
                     <!-- Comic Details -->
-                    <div class="md:w-2/3">
-                        <h1 class="text-3xl font-bold text-gray-900">{{ $comic->title }}</h1>
-                        <p class="mt-2 text-md text-gray-600">By {{ $comic->author ?? 'Unknown Author' }}</p>
-                        <p class="mt-4 text-gray-700">{{ $comic->description ?? 'No description available.' }}</p>
+                    <div class="md:col-span-2">
+                        <h1 class="text-4xl font-bold">{{ $comic->title }}</h1>
+                        <p class="mt-2 text-lg">Author: {{ $comic->author ?? 'Unknown Author' }}</p>
+                        <p class="mt-1 text-sm">Translator: {{ $comic->uploader->name ?? 'N/A' }}</p>
+                        
+                        <div class="mt-4 prose max-w-none">
+                            <p>{{ $comic->description ?? 'No description available.' }}</p>
+                        </div>
 
-@auth
-    <div class="mt-6">
-        <form method="POST" action="{{ route('comics.toggleFavorite', $comic) }}">
-            @csrf
-            <x-primary-button type="submit">
-                @if(auth()->user()->favoriteComics->contains($comic->id))
-                    Remove from Favorites
-                @else
-                    Add to Favorites
-                @endif
-            </x-primary-button>
-        </form>
-    </div>
-@endauth
-
-                        @if(Auth::check() && Auth::user()->is_admin)
-                            <div class="mt-6 flex items-center gap-4">
-                                <a href="{{ route('comics.edit', $comic) }}"
-                                   class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 focus:outline-none focus:border-blue-700 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">Edit</a>
-                                <form method="POST" action="{{ route('comics.destroy', $comic) }}"
-                                      onsubmit="return confirm('Are you sure you want to delete this comic?');">
+                        @auth
+                            <div class="mt-6">
+                                <form method="POST" action="{{ route('comics.toggleFavorite', $comic) }}">
                                     @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring ring-red-300 disabled:opacity-25 transition ease-in-out duration-150">Delete</button>
+                                    <button type="submit" class="btn btn-outline btn-secondary">
+                                        @if(auth()->user()->favoriteComics->contains($comic->id))
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                            Remove from Favorites
+                                        @else
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                            Add to Favorites
+                                        @endif
+                                    </button>
                                 </form>
                             </div>
-                        @endif
+                        @endauth
+
+                        @can('update', $comic)
+                            <div class="mt-6 flex items-center gap-4">
+                                <a href="{{ route('comics.edit', $comic) }}" class="btn btn-info">Edit Comic</a>
+                                <form method="POST" action="{{ route('comics.destroy', $comic) }}" onsubmit="return confirm('Are you sure you want to delete this comic?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-error">Delete Comic</button>
+                                </form>
+                            </div>
+                        @endcan
                     </div>
                 </div>
+            </div>
 
-                <!-- Session Status -->
-                @if(session('success'))
-                    <div class="mb-4 p-4 bg-green-100 text-green-700 border border-green-300 rounded-lg">
-                        {{ session('success') }}
+            <!-- Session Status -->
+            @if(session('success'))
+                <div class="alert alert-success shadow-lg mt-8">
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>{{ session('success') }}</span>
                     </div>
-                @endif
-                @if(session('error'))
-                    <div class="mb-4 p-4 bg-red-100 text-red-700 border border-red-300 rounded-lg">
-                        {{ session('error') }}
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="alert alert-error shadow-lg mt-8">
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>{{ session('error') }}</span>
                     </div>
-                @endif
+                </div>
+            @endif
 
-                <!-- Chapters List -->
+            <!-- Chapters List -->
+            <div class="mt-8 bg-base-100 shadow-xl rounded-lg p-6 md:p-8 border border-base-300">
+                <h3 class="text-3xl font-bold mb-6">Chapters</h3>
                 @if($comic->chapters->count())
-                    <div class="mt-8">
-                        <h3 class="text-2xl font-semibold mb-4">Chapters</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            @foreach($comic->chapters as $chapter)
-                                <div class="bg-gray-50 p-4 rounded-lg shadow hover:shadow-lg transition">
-                                    <h4 class="font-bold text-lg">Chapter {{ $chapter->chapter_number }}: {{ $chapter->title }}</h4>
-                                    <p class="text-gray-600 mt-1">{{ $chapter->description }}</p>
-                                    <p class="mt-2 text-sm text-gray-500">Price: {{ $chapter->price }} coins</p>
-                                    @if(Auth::check() && Auth::user()->is_admin)
-                                        <div class="mt-2 flex gap-2">
-                                            <a href="{{ route('chapters.edit', $chapter) }}"
-                                               class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-400">Edit</a>
-                                            <form method="POST" action="{{ route('chapters.destroy', $chapter) }}" onsubmit="return confirm('Delete this chapter?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-400">Delete</button>
-                                            </form>
-                                        </div>
-                                    @endif
-                                    @auth
-                                        @if($purchasedChapterIds->contains($chapter->id))
-                                            <a href="{{ route('chapters.show', $chapter) }}" class="mt-2 inline-flex items-center px-3 py-1 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 focus:outline-none focus:border-green-700 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">Read</a>
-                                        @else
-                                            <form method="POST" action="{{ route('chapters.purchase', $chapter) }}" class="mt-2">
-                                                @csrf
-                                                <x-primary-button class="ms-2">
-                                                    {{ __('Buy for ') }}{{ $chapter->price }} {{ __('coins') }}
-                                                </x-primary-button>
-                                            </form>
-                                        @endif
-                                    @else
-                                        <span class="mt-2 inline-block text-gray-700 text-sm">{{ $chapter->price }} Coins</span>
-                                        <a href="{{ route('login') }}" class="mt-2 inline-flex items-center px-3 py-1 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">Login to Buy</a>
-                                    @endauth
-                                </div>
-                            @endforeach
-                        </div>
+                    <div class="overflow-x-auto">
+                        <table class="table w-full">
+                            <thead>
+                                <tr>
+                                    <th>Chapter</th>
+                                    <th>Price</th>
+                                    <th>Action</th>
+                                    @can('update', $comic)
+                                        <th>Manage</th>
+                                    @endcan
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($comic->chapters as $chapter)
+                                    <tr class="hover">
+                                        <td>
+                                            <a href="{{ route('chapters.show', $chapter) }}" class="font-bold">Chapter {{ $chapter->chapter_number }}: {{ $chapter->title }}</a>
+                                            <p class="text-sm opacity-70">{{ $chapter->description }}</p>
+                                        </td>
+                                        <td><span class="badge badge-ghost">{{ $chapter->price }} coins</span></td>
+                                        <td>
+                                            @auth
+                                                @if($purchasedChapterIds->contains($chapter->id) || (Auth::check() && Auth::user()->is_admin))
+                                                    <a href="{{ route('chapters.show', $chapter) }}" class="btn btn-primary btn-sm">Read</a>
+                                                @else
+                                                    <form method="POST" action="{{ route('chapters.purchase', $chapter) }}">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-secondary btn-sm">Buy</button>
+                                                    </form>
+                                                @endif
+                                            @else
+                                                <a href="{{ route('login') }}" class="btn btn-accent btn-sm">Login to Buy</a>
+                                            @endauth
+                                        </td>
+                                        @can('update', $comic)
+                                            <td>
+                                                <div class="flex gap-2">
+                                                    <a href="{{ route('chapters.edit', $chapter) }}" class="btn btn-info btn-xs">Edit</a>
+                                                    <form method="POST" action="{{ route('chapters.destroy', $chapter) }}" onsubmit="return confirm('Delete this chapter?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-error btn-xs">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        @endcan
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                @endif
-
-                <!-- Add New Chapter Form -->
-                @if(Auth::check() && Auth::user()->is_admin)
-                    <div class="mt-8 pt-6 border-t border-gray-200">
-                        <h3 class="text-2xl font-semibold mb-4">Add New Chapter</h3>
-                        <form method="POST" action="{{ route('chapters.store') }}">
-                            @csrf
-                            <input type="hidden" name="comic_id" value="{{ $comic->id }}">
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <x-input-label for="chapter_number" :value="__('Chapter Number')" />
-                                    <x-text-input id="chapter_number" class="block mt-1 w-full" type="number" name="chapter_number" :value="old('chapter_number')" required />
-                                    <x-input-error :messages="$errors->get('chapter_number')" class="mt-2" />
-                                </div>
-                                <div>
-                                    <x-input-label for="title" :value="__('Chapter Title')" />
-                                    <x-text-input id="title" class="block mt-1 w-full" type="text" name="title" :value="old('title')" required />
-                                    <x-input-error :messages="$errors->get('title')" class="mt-2" />
-                                </div>
-                            </div>
-
-                            <div class="mt-4">
-                                <x-input-label for="description" :value="__('Description')" />
-                                <textarea id="description" name="description" rows="3" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('description') }}</textarea>
-                                <x-input-error :messages="$errors->get('description')" class="mt-2" />
-                            </div>
-
-                            <div class="mt-4">
-                                <x-input-label for="price" :value="__('Price (Coins)')" />
-                                <x-text-input id="price" class="block mt-1 w-full" type="number" name="price" :value="old('price', 0)" required />
-                                <x-input-error :messages="$errors->get('price')" class="mt-2" />
-                            </div>
-
-                            <div class="flex items-center justify-end mt-4">
-                                <x-primary-button class="ms-4">
-                                    {{ __('Add Chapter') }}
-                                </x-primary-button>
-                            </div>
-                        </form>
-                    </div>
+                @else
+                    <p>No chapters found.</p>
                 @endif
             </div>
+
+            <!-- Add New Chapter Form -->
+            @can('update', $comic)
+                <div class="mt-8 bg-base-100 shadow-xl rounded-lg p-6 md:p-8 border border-base-300">
+                    <h3 class="text-3xl font-bold mb-6">Add New Chapter</h3>
+                    <form method="POST" action="{{ route('chapters.store') }}" class="space-y-4">
+                        @csrf
+                        <input type="hidden" name="comic_id" value="{{ $comic->id }}">
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">Chapter Number</span></label>
+                            <input type="number" name="chapter_number" class="input input-bordered" required>
+                        </div>
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">Chapter Title</span></label>
+                            <input type="text" name="title" class="input input-bordered" required>
+                        </div>
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">Description</span></label>
+                            <textarea name="description" class="textarea textarea-bordered" rows="3"></textarea>
+                        </div>
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">Price (Coins)</span></label>
+                            <input type="number" name="price" value="0" class="input input-bordered" required>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="btn btn-primary">Add Chapter</button>
+                        </div>
+                    </form>
+                </div>
+            @endif
+
         </div>
     </div>
 </x-app-layout>

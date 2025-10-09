@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Models\Chapter;
 use App\Models\Comic;
 use App\Models\Page;
+use Illuminate\Support\Facades\Storage;
 
 class ChapterController extends Controller
 {
@@ -98,5 +99,42 @@ class ChapterController extends Controller
         // ไม่ซื้อ → redirect
         return redirect()->route('comics.show', $chapter->comic_id)
             ->with('error', 'You must purchase this chapter to view it.');
+    }
+
+    public function addPages(Request $request, Chapter $chapter)
+    {
+        $validated = $request->validate([
+            'images.*' => 'required|image|max:4096',
+        ]);
+
+        if ($request->hasFile('images')) {
+            $pageCount = $chapter->pages()->count();
+            foreach ($request->file('images') as $index => $image) {
+                $path = $image->store('chapter_pages', 'public');
+                $chapter->pages()->create([
+                    'page_number' => $pageCount + $index + 1,
+                    'image_path' => $path,
+                ]);
+            }
+        }
+
+        return redirect()->route('chapters.show', $chapter)
+                         ->with('success', 'Pages added successfully!');
+    }
+
+    public function destroyAllPages(Chapter $chapter)
+    {
+        // Delete all image files
+        foreach ($chapter->pages as $page) {
+            if ($page->image_path) {
+                Storage::disk('public')->delete($page->image_path);
+            }
+        }
+
+        // Delete all pages from the database
+        $chapter->pages()->delete();
+
+        return redirect()->route('chapters.show', $chapter)
+                         ->with('success', 'All pages for this chapter have been deleted.');
     }
 }

@@ -14,26 +14,29 @@ class PurchaseController extends Controller
     {
         $user = Auth::user();
 
-        // 1. Check if user is logged in (already handled by middleware, but good to be explicit)
         if (!$user) {
             return redirect()->route('login')->with('error', 'Please log in to purchase chapters.');
         }
 
-        // 2. Check if user has already purchased the chapter
         if ($user->transactions()->where('chapter_id', $chapter->id)->exists()) {
             return back()->with('error', 'You have already purchased this chapter.');
         }
 
-        // 3. Check if user has enough coins
         if ($user->coins < $chapter->price) {
             return back()->with('error', 'Not enough coins to purchase this chapter.');
         }
 
-        // 4. Perform the transaction
-        DB::transaction(function () use ($user, $chapter) {
+        $comic = $chapter->comic;
+        $uploader = $comic->uploader;
+
+        DB::transaction(function () use ($user, $chapter, $uploader) {
             // Deduct coins from user
-            $user->coins -= $chapter->price;
-            $user->save();
+            $user->decrement('coins', $chapter->price);
+
+            // Add coins to the uploader, if they exist
+            if ($uploader) {
+                $uploader->increment('coins', $chapter->price);
+            }
 
             // Create transaction record
             Transaction::create([
@@ -43,6 +46,6 @@ class PurchaseController extends Controller
             ]);
         });
 
-        return back()->with('success', 'Chapter purchased successfully!');
+        return back()->with('success', 'Chapter purchased successfully! Coins have been transferred to the translator.');
     }
 }

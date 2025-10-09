@@ -14,12 +14,24 @@
                 <p class="text-gray-700 mb-6">{{ $chapter->description ?? 'No description available.' }}</p>
 
                 @if($chapter->pages->count() > 0)
-                    <div class="space-y-6">
+                    <div class="space-y-0">
                         @foreach($chapter->pages as $page)
-                            <div class="bg-gray-100 rounded-lg p-2">
+                            <div>
                                 <img src="{{ asset('storage/' . $page->image_path) }}" alt="Page {{ $page->page_number }}"
-                                    class="w-full rounded">
-                                <p class="text-center text-gray-500 mt-2">Page {{ $page->page_number }}</p>
+                                    class="w-full">
+                                <div class="flex justify-between items-center mt-2">
+                                    <p class="text-center text-gray-500">Page {{ $page->page_number }}</p>
+                                    @if(auth()->user()?->is_admin)
+                                        <div class="flex gap-2">
+                                            <a href="{{ route('pages.edit', $page) }}" class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-400">Edit</a>
+                                            <form method="POST" action="{{ route('pages.destroy', $page) }}" onsubmit="return confirm('Delete this page?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-400">Delete</button>
+                                            </form>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -29,29 +41,37 @@
                     </div>
                 @endif
 
-                {{-- Upload Button for Admin --}}
+                {{-- Admin Actions --}}
                 @if(auth()->user()?->is_admin)
-                    <div class="mt-6 bg-gray-50 p-4 rounded shadow-sm">
-                        <h3 class="font-semibold mb-2">Upload Pages</h3>
-                        <form action="{{ route('chapters.store') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <input type="hidden" name="comic_id" value="{{ $chapter->comic_id }}">
-                            <input type="hidden" name="chapter_number" value="{{ $chapter->chapter_number }}">
-                            <input type="hidden" name="title" value="{{ $chapter->title }}">
-                            <input type="hidden" name="description" value="{{ $chapter->description }}">
-                            <input type="hidden" name="price" value="{{ $chapter->price }}">
-                            <input type="file" name="images[]" multiple class="block w-full mb-2" required>
-                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500">
-                                Upload Pages
-                            </button>
-                        </form>
+                    <div class="mt-6 bg-base-200 p-4 rounded-lg shadow-inner">
+                        <h3 class="font-bold text-lg mb-4">Admin Actions</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            
+                            <div>
+                                <h4 class="font-semibold mb-2">Upload More Pages</h4>
+                                <form action="{{ route('chapters.addPages', $chapter) }}" method="POST" enctype="multipart/form-data" class="space-y-2">
+                                    @csrf
+                                    <input type="file" name="images[]" multiple class="file-input file-input-bordered w-full" required>
+                                    <button type="submit" class="btn btn-primary w-full">Upload</button>
+                                </form>
+                            </div>
 
+                            <div>
+                                <h4 class="font-semibold mb-2">Danger Zone</h4>
+                                <form method="POST" action="{{ route('chapters.destroyAllPages', $chapter) }}" onsubmit="return confirm('Are you sure you want to delete ALL pages in this chapter? This action cannot be undone.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-error w-full">Delete All Pages</button>
+                                </form>
+                            </div>
+
+                        </div>
                     </div>
                 @endif
 
                 <div class="mt-8">
                     <a href="{{ route('comics.show', $chapter->comic_id) }}"
-                        class="inline-flex items-center px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700">
+                        class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest shadow-md hover:bg-gray-500 hover:shadow-lg focus:bg-gray-500 active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transform hover:scale-105 transition-all ease-in-out duration-150">
                         Back to Comic
                     </a>
                 </div>
