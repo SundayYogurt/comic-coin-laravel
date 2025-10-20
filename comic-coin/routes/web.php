@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ComicController;
 use App\Http\Controllers\ChapterController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\CommentController;
 
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\PurchaseController;
@@ -25,8 +26,27 @@ Route::resource('chapters', ChapterController::class)->only([
     'create', 'store', 'show', 'edit', 'update', 'destroy'
 ]);
 
+// Chapter page management (admin-only)
+Route::post('chapters/{chapter}/pages', [ChapterController::class, 'addPages'])
+    ->name('chapters.addPages')
+    ->middleware(['auth', 'admin']);
+Route::delete('chapters/{chapter}/pages', [ChapterController::class, 'destroyAllPages'])
+    ->name('chapters.destroyAllPages')
+    ->middleware(['auth', 'admin']);
+
+// Page edit/update/delete (admin-only)
+Route::resource('pages', PageController::class)->only([
+    'edit', 'update', 'destroy'
+])->middleware(['auth', 'admin']);
+
 // Purchase Route
 Route::post('chapters/{chapter}/purchase', [PurchaseController::class, 'store'])->name('chapters.purchase')->middleware('auth');
+
+// Chapter Comments
+Route::middleware('auth')->group(function () {
+    Route::post('chapters/{chapter}/comments', [CommentController::class, 'store'])->name('chapters.comments.store')->middleware('throttle:comments');
+    Route::delete('comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+});
 
 Route::get('/', function () {
     return view('welcome');
@@ -55,5 +75,5 @@ Route::resource('banners', App\Http\Controllers\BannerController::class)->middle
 // Admin Wallet Management
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/wallet', [App\Http\Controllers\WalletController::class, 'index'])->name('wallet.index');
-    Route::post('/admin/wallet/add', [App\HttpControllers\WalletController::class, 'addCoins'])->name('wallet.add');
+    Route::post('/admin/wallet/add', [App\Http\Controllers\WalletController::class, 'addCoins'])->name('wallet.add');
 });

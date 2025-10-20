@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-base-300 border-b border-base-100">
+<nav x-data="{ open: false }" class="bg-base-300 border-b border-base-100 sticky top-0 z-50">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-base-content">
         <div class="flex justify-between h-16">
@@ -95,7 +95,7 @@
                 @endauth
                 @guest
                     <div class="ml-3">
-                        <a href="{{ route('login') }}" class="btn btn-sm btn-ghost">{{ __('Log in') }}</a>
+                        <a href="{{ route('login') }}" class="btn btn-sm btn-outline">{{ __('Log in') }}</a>
                         @if (Route::has('register'))
                             <a href="{{ route('register') }}" class="btn btn-sm btn-primary ml-2">{{ __('Register') }}</a>
                         @endif

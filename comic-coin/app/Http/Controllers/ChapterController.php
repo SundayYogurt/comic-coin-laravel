@@ -6,6 +6,7 @@ use App\Models\Chapter;
 use App\Models\Comic;
 use App\Models\Page;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class ChapterController extends Controller
 {
@@ -26,7 +27,10 @@ class ChapterController extends Controller
 {
     $validated = $request->validate([
         'comic_id' => 'required|exists:comics,id',
-        'chapter_number' => 'required|integer|min:1',
+        'chapter_number' => [
+            'required','integer','min:1',
+            Rule::unique('chapters','chapter_number')->where(fn($q)=>$q->where('comic_id', $request->input('comic_id'))),
+        ],
         'title' => 'required|string|max:255',
         'description' => 'nullable|string',
         'price' => 'required|integer|min:0',
@@ -59,7 +63,12 @@ class ChapterController extends Controller
     public function update(Request $request, Chapter $chapter) {
         $validated = $request->validate([
             'comic_id' => 'required|exists:comics,id',
-            'chapter_number' => 'required|integer|min:1',
+            'chapter_number' => [
+                'required','integer','min:1',
+                Rule::unique('chapters','chapter_number')
+                    ->where(fn($q)=>$q->where('comic_id', $request->input('comic_id')))
+                    ->ignore($chapter->id),
+            ],
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|integer|min:0',
@@ -83,7 +92,7 @@ class ChapterController extends Controller
         $user = auth()->user();
 
         // โหลด Pages
-        $chapter->load('pages');
+        $chapter->load(['pages', 'comments.user']);
 
         // ถ้า Chapter ฟรี
         if ($chapter->price == 0) return view('chapters.show', compact('chapter'));

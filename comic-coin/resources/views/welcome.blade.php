@@ -14,7 +14,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="antialiased">
-        <div class="navbar bg-base-100 shadow-lg">
+        <div class="navbar bg-base-100 shadow-lg sticky top-0 z-50">
             <div class="flex-1">
                 <a class="btn btn-ghost normal-case text-xl" href="/">Comic Coin</a>
             </div>
@@ -37,7 +37,7 @@
 
         <div class="hero min-h-screen" style="background-image: url('{{ asset('hanma.jpg') }}');">
             <div class="hero-overlay bg-opacity-60"></div>
-            <div class="hero-content text-center text-neutral-content">
+            <div class="hero-content text-center text-base-content">
                 <div class="max-w-md">
                     <h1 class="mb-5 text-5xl font-bold">Welcome to Comic Coin</h1>
                     <p class="mb-5">Your one-stop platform to read exclusive digital comics. Dive into new worlds and support your favorite creators.</p>

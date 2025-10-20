@@ -22,4 +22,8 @@ class Chapter extends Model
     {
         return $this->hasMany(Page::class)->orderBy('page_number'); // เรียงตาม page_number
     }
+    public function comments()
+    {
+        return $this->hasMany(\App\Models\Comment::class)->latest();
+    }
 }

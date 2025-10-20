@@ -107,20 +107,30 @@
                                             <a href="{{ route('chapters.show', $chapter) }}" class="font-bold">Chapter {{ $chapter->chapter_number }}: {{ $chapter->title }}</a>
                                             <p class="text-sm opacity-70">{{ $chapter->description }}</p>
                                         </td>
-                                        <td><span class="badge badge-ghost">{{ $chapter->price }} coins</span></td>
                                         <td>
-                                            @auth
-                                                @if($purchasedChapterIds->contains($chapter->id) || (Auth::check() && Auth::user()->is_admin))
-                                                    <a href="{{ route('chapters.show', $chapter) }}" class="btn btn-primary btn-sm">Read</a>
-                                                @else
-                                                    <form method="POST" action="{{ route('chapters.purchase', $chapter) }}">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-secondary btn-sm">Buy</button>
-                                                    </form>
-                                                @endif
+                                            @if($chapter->price == 0)
+                                                <span class="badge badge-success">Free</span>
                                             @else
-                                                <a href="{{ route('login') }}" class="btn btn-accent btn-sm">Login to Buy</a>
-                                            @endauth
+                                                <span class="badge badge-ghost">{{ $chapter->price }} coins</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($chapter->price == 0)
+                                                <a href="{{ route('chapters.show', $chapter) }}" class="btn btn-primary btn-sm">Read</a>
+                                            @else
+                                                @auth
+                                                    @if($purchasedChapterIds->contains($chapter->id) || auth()->user()->is_admin)
+                                                        <a href="{{ route('chapters.show', $chapter) }}" class="btn btn-primary btn-sm">Read</a>
+                                                    @else
+                                                        <form method="POST" action="{{ route('chapters.purchase', $chapter) }}">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-secondary btn-sm">Buy</button>
+                                                        </form>
+                                                    @endif
+                                                @else
+                                                    <a href="{{ route('login') }}" class="btn btn-accent btn-sm">Login to Buy</a>
+                                                @endauth
+                                            @endif
                                         </td>
                                         @can('update', $comic)
                                             <td>
