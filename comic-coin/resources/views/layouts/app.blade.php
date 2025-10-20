@@ -14,13 +14,13 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
+    <body class="font-sans antialiased text-base-content">
         <div class="min-h-screen bg-base-200">
             @include('layouts.navigation')
 
             <!-- Page Heading -->
             @if (isset($header))
-                <header class="bg-white shadow">
+                <header class="bg-base-100 shadow">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
@@ -31,6 +31,13 @@
             <main>
                 {{ $slot }}
             </main>
+
+            <footer class="footer footer-center p-4 bg-base-300 text-base-content">
+                <div>
+                    <p>Copyright © 2025 - All right reserved by Comic Coin</p>
+                </div>
+            </footer>
         </div>
+        @stack('scripts')
     </body>
 </html>

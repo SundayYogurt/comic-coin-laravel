@@ -35,7 +35,7 @@
             </div>
         </div>
 
-        <div class="hero min-h-screen" style="background-image: url(https://source.unsplash.com/random/1600x900/?comics);">
+        <div class="hero min-h-screen" style="background-image: url('{{ asset('hanma.jpg') }}');">
             <div class="hero-overlay bg-opacity-60"></div>
             <div class="hero-content text-center text-neutral-content">
                 <div class="max-w-md">

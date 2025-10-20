@@ -38,6 +38,19 @@
                             <x-input-error :messages="$errors->get('description')" class="mt-2" />
                         </div>
 
+                        <!-- Translator (Uploader) -->
+                        @if(Auth::user()->isAdmin())
+                            <div class="mt-4">
+                                <x-input-label for="uploader_id" :value="__('Translator')" />
+                                <select id="uploader_id" name="uploader_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}" {{ old('uploader_id', $comic->uploader_id) == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('uploader_id')" class="mt-2" />
+                            </div>
+                        @endif
+
                         <!-- Current Cover Image -->
                         @if ($comic->cover_image)
                             <div class="mt-4">

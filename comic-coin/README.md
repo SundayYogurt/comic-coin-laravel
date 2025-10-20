@@ -1,66 +1,57 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Comic Coin
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel 10 app for browsing comics, creating chapters and pages, purchasing chapters with coins, and managing homepage banners.
 
-## About Laravel
+Key features
+- Comics: list, search, favorite, CRUD for admins
+- Chapters: create, edit, purchase flow with coin balance
+- Pages: image uploads stored on `public` disk
+- Banners: upload hero images to feature on the comics index carousel
+- Auth: Breeze scaffolding with roles (admin, translator)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Requirements
+- PHP 8.1+
+- Node.js 18+ and npm
+- Composer
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Quick start
+- Install dependencies: `composer install` and `npm install`
+- Copy env and key: `cp .env.example .env` then `php artisan key:generate`
+- Database (default SQLite): ensure `.env` has
+  - `DB_CONNECTION=sqlite`
+  - `DB_DATABASE=absolute\path\to\database\database.sqlite` (file exists)
+- Migrate: `php artisan migrate`
+- Link storage: `php artisan storage:link`
+- Build assets: `npm run build` (or `npm run dev` during development)
+- Run app: `php artisan serve --port=8000`
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Images and storage
+- Comic covers: saved under `storage/app/public/covers/`
+- Chapter pages: saved under `storage/app/public/chapter_pages/`
+- Banners: saved under `storage/app/public/banners/`
+- Served via `public/storage/...` after `php artisan storage:link`
 
-## Learning Laravel
+Managing banners (Hero)
+- Go to Banners → Add New Banner
+- Recommended size: 1280x400 (landscape)
+- Banners render in the carousel on the comics index
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Deploy via ngrok (for quick sharing)
+- Start Laravel: `php artisan serve --port=8000`
+- Start ngrok: `ngrok http --host-header=rewrite 8000`
+- Set `.env` for correct URLs/cookies:
+  - `APP_URL=https://<your-subdomain>.ngrok-free.app`
+  - Optional for cookies: `SESSION_SECURE_COOKIE=true`
+  - If using SPA/Sanctum: `SANCTUM_STATEFUL_DOMAINS=<your-subdomain>.ngrok-free.app`
+- Ensure proxies are trusted so HTTPS is respected behind ngrok:
+  - In `app/Http/Middleware/TrustProxies.php`, set `protected $proxies = '*';`
+- Clear caches if needed: `php artisan config:clear && php artisan route:clear`
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Common tasks
+- Clear views/routes: `php artisan view:clear && php artisan route:clear`
+- Rebuild assets: `npm run build`
+- Run tests: `php artisan test`
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Notes
+- If assets 404 under `/storage/...`, re-run `php artisan storage:link`
+- If login/redirect loops on ngrok, verify `APP_URL` uses the https ngrok URL and proxies are trusted

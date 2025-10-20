@@ -1,7 +1,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-[data-theme="dark"] body {
-    color: #d1d5db; /* gray-300 */
-}

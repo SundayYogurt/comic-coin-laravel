@@ -5,15 +5,33 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Comic;
 use App\Models\User;
+use App\Models\Banner; // Add this line
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
 class ComicController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $comics = Comic::latest()->get();
-        return view('comics.index', compact('comics'));
+        $favoriteComics = collect();
+        $comicsQuery = Comic::latest();
+
+        if ($request->has('search')) {
+            $comicsQuery->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        if (Auth::check()) {
+            $favoriteComics = Auth::user()->favoriteComics()->get();
+            $comicsQuery->whereNotIn('id', $favoriteComics->pluck('id'));
+        }
+
+        $banners = Banner::latest()->get();
+
+        return view('comics.index', [
+            'comics' => $comicsQuery->get(),
+            'favoriteComics' => $favoriteComics,
+            'banners' => $banners,
+        ]);
     }
 
     public function create()
@@ -52,7 +70,8 @@ class ComicController extends Controller
         if (Auth::user()->cannot('update', $comic)) {
             abort(403);
         }
-        return view('comics.edit', compact('comic'));
+        $users = User::where('role', User::ROLE_TRANSLATOR)->orWhere('is_admin', true)->get();
+        return view('comics.edit', compact('comic', 'users'));
     }
 
     public function update(Request $request, Comic $comic)
@@ -66,6 +85,7 @@ class ComicController extends Controller
             'description' => 'nullable|string',
             'author' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'uploader_id' => 'nullable|exists:users,id',
         ]);
 
         if ($request->hasFile('cover_image')) {
@@ -73,6 +93,10 @@ class ComicController extends Controller
                 Storage::disk('public')->delete($comic->cover_image);
             }
             $validated['cover_image'] = $request->file('cover_image')->store('covers', 'public');
+        }
+
+        if (Auth::user()->isAdmin() && $request->has('uploader_id')) {
+            $comic->uploader_id = $request->uploader_id;
         }
 
         $comic->update($validated);
@@ -96,6 +120,8 @@ class ComicController extends Controller
 
     public function show(Comic $comic)
     {
+        $comic->increment('views');
+
         $comic->load('chapters');
 
         $purchasedChapterIds = collect();
